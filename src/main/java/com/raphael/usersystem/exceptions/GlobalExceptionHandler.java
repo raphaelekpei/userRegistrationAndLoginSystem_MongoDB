@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice
-public class GlobalExceptionHandle extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(UserManagementException.class)
     public ResponseEntity<Object>  userManagementExceptionHandler(UserManagementException userManagementException){
@@ -26,6 +26,10 @@ public class GlobalExceptionHandle extends ResponseEntityExceptionHandler {
                 .build();
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }
+/*
+NoHandlerFoundException is thrown when a requested API service cannot be found
+By default when the DispatcherServlet can't find a handler for a request it sends a 404 response.
+ */
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<Object> noHandlerFoundExceptionHandler(NoHandlerFoundException noHandlerFoundException){
@@ -37,18 +41,20 @@ public class GlobalExceptionHandle extends ResponseEntityExceptionHandler {
                 .build();
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.NOT_FOUND);
     }
-
+/*
+MethodArgumentNotValidException is thrown when an argument annotated with @Valid failed validation
+ */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException methodArgumentNotValidException){
-        List<String> errors = new ArrayList<>();
+        List<String> details = new ArrayList<>();
         for (FieldError error : methodArgumentNotValidException.getBindingResult().getFieldErrors()){
-            errors.add(error.getDefaultMessage());
+            details.add(error.getDefaultMessage());
         }
         APIErrorResponse apiErrorResponse = APIErrorResponse.builder()
                 .isSuccessful(false)
                 .timeStamp(LocalDateTime.now())
                 .message(methodArgumentNotValidException.getMessage())
-                .fieldErrors(errors)
+                .fieldErrors(details)
                 .build();
 
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
